@@ -19,10 +19,10 @@ export const Route = createFileRoute("/_authenticated/acceso")({
 type Result = {
   ok: boolean;
   nombre: string;
-  foto?: string | null;
-  plan?: string;
-  dias?: number;
-  motivo?: string;
+  foto?: string | null | undefined;
+  plan?: string | undefined;
+  dias?: number | undefined;
+  motivo?: string | undefined;
   codigo?: string;
 };
 

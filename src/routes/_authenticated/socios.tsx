@@ -54,7 +54,7 @@ function Socios() {
 
   async function baja(s: Socio) {
     const { error } = await supabase.from("socios").update({ activo: !s.activo }).eq("id", s.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(s.activo ? "Socio dado de baja" : "Socio reactivado");
     qc.invalidateQueries({ queryKey: ["socios"] });
   }
@@ -160,14 +160,14 @@ function SocioForm({ socio, onClose, onSaved }: { socio: Partial<Socio>; onClose
   }
 
   async function save() {
-    if (!v.nombres || !v.apellidos) return toast.error("Nombres y apellidos son obligatorios");
+    if (!v.nombres || !v.apellidos) { toast.error("Nombres y apellidos son obligatorios"); return; }
     setSaving(true);
     const payload = { ...v, dni: v.dni || null };
     const { error } = socio.id
       ? await supabase.from("socios").update(payload).eq("id", socio.id)
       : await supabase.from("socios").insert(payload);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(socio.id ? "Socio actualizado" : "Socio registrado");
     onSaved();
   }

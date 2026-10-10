@@ -13,7 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccesoRouteImport } from './routes/_authenticated/acceso'
+import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMembresiasRouteImport } from './routes/_authenticated/membresias'
+import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
+import { Route as AuthenticatedRutinasRouteImport } from './routes/_authenticated/rutinas'
 import { Route as AuthenticatedSociosRouteImport } from './routes/_authenticated/socios'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,9 +40,35 @@ const AuthenticatedAccesoRoute = AuthenticatedAccesoRouteImport.update({
   path: '/acceso',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfiguracionRoute =
+  AuthenticatedConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMembresiasRoute = AuthenticatedMembresiasRouteImport.update({
+  id: '/membresias',
+  path: '/membresias',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPosRoute = AuthenticatedPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRutinasRoute = AuthenticatedRutinasRouteImport.update({
+  id: '/rutinas',
+  path: '/rutinas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSociosRoute = AuthenticatedSociosRouteImport.update({
@@ -50,14 +81,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/acceso': typeof AuthenticatedAccesoRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/membresias': typeof AuthenticatedMembresiasRoute
+  '/portal': typeof AuthenticatedPortalRoute
+  '/pos': typeof AuthenticatedPosRoute
+  '/rutinas': typeof AuthenticatedRutinasRoute
   '/socios': typeof AuthenticatedSociosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/acceso': typeof AuthenticatedAccesoRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/membresias': typeof AuthenticatedMembresiasRoute
+  '/portal': typeof AuthenticatedPortalRoute
+  '/pos': typeof AuthenticatedPosRoute
+  '/rutinas': typeof AuthenticatedRutinasRoute
   '/socios': typeof AuthenticatedSociosRoute
 }
 export interface FileRoutesById {
@@ -66,21 +107,51 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/acceso': typeof AuthenticatedAccesoRoute
+  '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/membresias': typeof AuthenticatedMembresiasRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRoute
+  '/_authenticated/pos': typeof AuthenticatedPosRoute
+  '/_authenticated/rutinas': typeof AuthenticatedRutinasRoute
   '/_authenticated/socios': typeof AuthenticatedSociosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/acceso' | '/dashboard' | '/socios'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/acceso'
+    | '/configuracion'
+    | '/dashboard'
+    | '/membresias'
+    | '/portal'
+    | '/pos'
+    | '/rutinas'
+    | '/socios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/acceso' | '/dashboard' | '/socios'
+  to:
+    | '/'
+    | '/auth'
+    | '/acceso'
+    | '/configuracion'
+    | '/dashboard'
+    | '/membresias'
+    | '/portal'
+    | '/pos'
+    | '/rutinas'
+    | '/socios'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/acceso'
+    | '/_authenticated/configuracion'
     | '/_authenticated/dashboard'
+    | '/_authenticated/membresias'
+    | '/_authenticated/portal'
+    | '/_authenticated/pos'
+    | '/_authenticated/rutinas'
     | '/_authenticated/socios'
   fileRoutesById: FileRoutesById
 }
@@ -120,11 +191,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccesoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracion': {
+      id: '/_authenticated/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof AuthenticatedConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/membresias': {
+      id: '/_authenticated/membresias'
+      path: '/membresias'
+      fullPath: '/membresias'
+      preLoaderRoute: typeof AuthenticatedMembresiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pos': {
+      id: '/_authenticated/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof AuthenticatedPosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rutinas': {
+      id: '/_authenticated/rutinas'
+      path: '/rutinas'
+      fullPath: '/rutinas'
+      preLoaderRoute: typeof AuthenticatedRutinasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/socios': {
@@ -139,13 +245,23 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccesoRoute: typeof AuthenticatedAccesoRoute
+  AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMembresiasRoute: typeof AuthenticatedMembresiasRoute
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
+  AuthenticatedPosRoute: typeof AuthenticatedPosRoute
+  AuthenticatedRutinasRoute: typeof AuthenticatedRutinasRoute
   AuthenticatedSociosRoute: typeof AuthenticatedSociosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccesoRoute: AuthenticatedAccesoRoute,
+  AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMembresiasRoute: AuthenticatedMembresiasRoute,
+  AuthenticatedPortalRoute: AuthenticatedPortalRoute,
+  AuthenticatedPosRoute: AuthenticatedPosRoute,
+  AuthenticatedRutinasRoute: AuthenticatedRutinasRoute,
   AuthenticatedSociosRoute: AuthenticatedSociosRoute,
 }
 
