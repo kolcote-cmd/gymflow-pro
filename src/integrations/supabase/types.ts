@@ -14,16 +14,519 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      auditoria: {
+        Row: {
+          accion: string
+          detalle: string | null
+          fecha_hora: string
+          id: string
+          tabla: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          accion: string
+          detalle?: string | null
+          fecha_hora?: string
+          id?: string
+          tabla?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          accion?: string
+          detalle?: string | null
+          fecha_hora?: string
+          id?: string
+          tabla?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
+      caja_turnos: {
+        Row: {
+          apertura: string
+          cierre: string | null
+          id: string
+          monto_cierre: number | null
+          monto_inicial: number
+          notas: string | null
+          total_ventas: number | null
+          usuario_id: string | null
+        }
+        Insert: {
+          apertura?: string
+          cierre?: string | null
+          id?: string
+          monto_cierre?: number | null
+          monto_inicial?: number
+          notas?: string | null
+          total_ventas?: number | null
+          usuario_id?: string | null
+        }
+        Update: {
+          apertura?: string
+          cierre?: string | null
+          id?: string
+          monto_cierre?: number | null
+          monto_inicial?: number
+          notas?: string | null
+          total_ventas?: number | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
+      detalle_ventas_pos: {
+        Row: {
+          cantidad: number
+          id: string
+          precio_unitario: number
+          producto_id: string | null
+          subtotal: number
+          venta_id: string
+        }
+        Insert: {
+          cantidad: number
+          id?: string
+          precio_unitario: number
+          producto_id?: string | null
+          subtotal: number
+          venta_id: string
+        }
+        Update: {
+          cantidad?: number
+          id?: string
+          precio_unitario?: number
+          producto_id?: string | null
+          subtotal?: number
+          venta_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detalle_ventas_pos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "detalle_ventas_pos_venta_id_fkey"
+            columns: ["venta_id"]
+            isOneToOne: false
+            referencedRelation: "ventas_pos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluaciones: {
+        Row: {
+          brazo: number | null
+          cadera: number | null
+          cintura: number | null
+          entrenador_id: string | null
+          fecha: string
+          grasa_pct: number | null
+          id: string
+          masa_muscular: number | null
+          pecho: number | null
+          peso: number | null
+          pierna: number | null
+          socio_id: string
+        }
+        Insert: {
+          brazo?: number | null
+          cadera?: number | null
+          cintura?: number | null
+          entrenador_id?: string | null
+          fecha?: string
+          grasa_pct?: number | null
+          id?: string
+          masa_muscular?: number | null
+          pecho?: number | null
+          peso?: number | null
+          pierna?: number | null
+          socio_id: string
+        }
+        Update: {
+          brazo?: number | null
+          cadera?: number | null
+          cintura?: number | null
+          entrenador_id?: string | null
+          fecha?: string
+          grasa_pct?: number | null
+          id?: string
+          masa_muscular?: number | null
+          pecho?: number | null
+          peso?: number | null
+          pierna?: number | null
+          socio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluaciones_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planes_membresia: {
+        Row: {
+          activo: boolean
+          descripcion: string | null
+          duracion_dias: number
+          id: string
+          nombre: string
+          precio: number
+        }
+        Insert: {
+          activo?: boolean
+          descripcion?: string | null
+          duracion_dias: number
+          id?: string
+          nombre: string
+          precio: number
+        }
+        Update: {
+          activo?: boolean
+          descripcion?: string | null
+          duracion_dias?: number
+          id?: string
+          nombre?: string
+          precio?: number
+        }
+        Relationships: []
+      }
+      productos: {
+        Row: {
+          categoria: string
+          codigo_barras: string | null
+          id: string
+          imagen: string | null
+          nombre: string
+          precio_venta: number
+          stock_actual: number
+          stock_minimo: number
+        }
+        Insert: {
+          categoria: string
+          codigo_barras?: string | null
+          id?: string
+          imagen?: string | null
+          nombre: string
+          precio_venta: number
+          stock_actual?: number
+          stock_minimo?: number
+        }
+        Update: {
+          categoria?: string
+          codigo_barras?: string | null
+          id?: string
+          imagen?: string | null
+          nombre?: string
+          precio_venta?: number
+          stock_actual?: number
+          stock_minimo?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      registros_acceso: {
+        Row: {
+          estado: string
+          fecha_hora: string
+          id: string
+          motivo_denegado: string | null
+          salida: string | null
+          socio_id: string | null
+        }
+        Insert: {
+          estado: string
+          fecha_hora?: string
+          id?: string
+          motivo_denegado?: string | null
+          salida?: string | null
+          socio_id?: string | null
+        }
+        Update: {
+          estado?: string
+          fecha_hora?: string
+          id?: string
+          motivo_denegado?: string | null
+          salida?: string | null
+          socio_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registros_acceso_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rutinas: {
+        Row: {
+          created_at: string
+          descanso_seg: number
+          dia: string
+          ejercicio: string
+          entrenador_id: string | null
+          grupo_muscular: string
+          id: string
+          repeticiones: string
+          series: number
+          socio_id: string
+        }
+        Insert: {
+          created_at?: string
+          descanso_seg?: number
+          dia: string
+          ejercicio: string
+          entrenador_id?: string | null
+          grupo_muscular: string
+          id?: string
+          repeticiones?: string
+          series?: number
+          socio_id: string
+        }
+        Update: {
+          created_at?: string
+          descanso_seg?: number
+          dia?: string
+          ejercicio?: string
+          entrenador_id?: string | null
+          grupo_muscular?: string
+          id?: string
+          repeticiones?: string
+          series?: number
+          socio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rutinas_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      socios: {
+        Row: {
+          activo: boolean
+          alergias: string | null
+          apellidos: string
+          codigo_socio: string
+          contacto_emergencia: string | null
+          created_at: string
+          dni: string | null
+          email: string | null
+          foto_url: string | null
+          id: string
+          nombres: string
+          notas_medicas: string | null
+          observaciones: string | null
+          profile_id: string | null
+          qr_code: string
+          telefono: string | null
+        }
+        Insert: {
+          activo?: boolean
+          alergias?: string | null
+          apellidos: string
+          codigo_socio?: string
+          contacto_emergencia?: string | null
+          created_at?: string
+          dni?: string | null
+          email?: string | null
+          foto_url?: string | null
+          id?: string
+          nombres: string
+          notas_medicas?: string | null
+          observaciones?: string | null
+          profile_id?: string | null
+          qr_code?: string
+          telefono?: string | null
+        }
+        Update: {
+          activo?: boolean
+          alergias?: string | null
+          apellidos?: string
+          codigo_socio?: string
+          contacto_emergencia?: string | null
+          created_at?: string
+          dni?: string | null
+          email?: string | null
+          foto_url?: string | null
+          id?: string
+          nombres?: string
+          notas_medicas?: string | null
+          observaciones?: string | null
+          profile_id?: string | null
+          qr_code?: string
+          telefono?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "socios_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suscripciones: {
+        Row: {
+          created_at: string
+          descuento: number
+          estado: string
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          metodo_pago: string | null
+          plan_id: string
+          socio_id: string
+          total_pagado: number
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          descuento?: number
+          estado?: string
+          fecha_fin: string
+          fecha_inicio?: string
+          id?: string
+          metodo_pago?: string | null
+          plan_id: string
+          socio_id: string
+          total_pagado?: number
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          descuento?: number
+          estado?: string
+          fecha_fin?: string
+          fecha_inicio?: string
+          id?: string
+          metodo_pago?: string | null
+          plan_id?: string
+          socio_id?: string
+          total_pagado?: number
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suscripciones_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "planes_membresia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suscripciones_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ventas_pos: {
+        Row: {
+          fecha_hora: string
+          id: string
+          metodo_pago: string
+          socio_id: string | null
+          total: number
+          usuario_id: string | null
+        }
+        Insert: {
+          fecha_hora?: string
+          id?: string
+          metodo_pago?: string
+          socio_id?: string | null
+          total: number
+          usuario_id?: string | null
+        }
+        Update: {
+          fecha_hora?: string
+          id?: string
+          metodo_pago?: string
+          socio_id?: string | null
+          total?: number
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ventas_pos_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_front: { Args: { _user_id: string }; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "ADMIN" | "RECEPCION" | "ENTRENADOR" | "SOCIO"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +653,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["ADMIN", "RECEPCION", "ENTRENADOR", "SOCIO"],
+    },
   },
 } as const
