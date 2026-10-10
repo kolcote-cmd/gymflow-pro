@@ -32,7 +32,7 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     nav({ to: "/dashboard" });
   }
   async function signUp(e: React.FormEvent) {
@@ -43,7 +43,7 @@ function AuthPage() {
       options: { emailRedirectTo: window.location.origin + "/dashboard", data: { full_name: name } },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (data.session) nav({ to: "/dashboard" });
     else toast.success("Revisa tu correo para confirmar la cuenta.");
   }
