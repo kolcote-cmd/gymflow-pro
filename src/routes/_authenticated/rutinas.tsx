@@ -1,13 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader } from "@/components/AppShell";
-
-export const Route = createFileRoute("/_authenticated/rutinas")({
-  validateSearch: (s: Record<string, unknown>) => ({ socio: typeof s["socio"] === "string" ? (s["socio"] as string) : undefined }),
-  head: () => ({ meta: [{ title: "Rutinas — IronCore" }] }),
-  component: () => (
-    <>
-      <PageHeader title="Rutinas" subtitle="Módulo en construcción" />
-      <p className="text-muted-foreground">Este módulo aún no está terminado.</p>
-    </>
-  ),
-});
+import { createFileRoute } from '@tanstack/react-router';
+import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { PageHeader } from '@/components/AppShell';
+import { DataTools,type Field } from '@/components/DataTools';
+import { Tabs,TabsList,TabsTrigger,TabsContent } from '@/components/ui/tabs';
+import { allow } from '@/lib/guard';
+import { pageHead } from '@/lib/meta';
+export const Route=createFileRoute('/_authenticated/rutinas')({beforeLoad:allow(['ADMIN','ENTRENADOR']),validateSearch:(s:Record<string,unknown>)=>({socio:typeof s.socio==='string'?s.socio:undefined}),head:()=>pageHead('Rutinas y evaluaciones','Entrenamiento personalizado y evolución corporal de los socios.'),component:Routines});
+const rf:Field[]=[{key:'dia',label:'Día',required:true},{key:'grupo_muscular',label:'Grupo muscular',required:true},{key:'ejercicio',label:'Ejercicio',required:true},{key:'series',label:'Series',type:'number',min:1,required:true},{key:'repeticiones',label:'Repeticiones',required:true},{key:'descanso_seg',label:'Descanso (s)',type:'number',min:0,required:true}];
+const ef:Field[]=[{key:'fecha',label:'Fecha',type:'date',required:true},...['peso','grasa_pct','masa_muscular','pecho','cintura','cadera','brazo','pierna'].map(key=>({key,label:({peso:'Peso (kg)',grasa_pct:'Grasa (%)',masa_muscular:'Músculo (kg)',pecho:'Pecho (cm)',cintura:'Cintura (cm)',cadera:'Cadera (cm)',brazo:'Brazo (cm)',pierna:'Pierna (cm)'} as Record<string,string>)[key],type:'number' as const,min:0,max:key==='grasa_pct'?100:999}))];
+function Routines(){const {user}=Route.useRouteContext();const search=Route.useSearch();const [socio,setSocio]=useState(search.socio??'');const qc=useQueryClient();const {data:members=[]}=useQuery({queryKey:['rutina-socios'],queryFn:async()=>{const r=await supabase.from('socios').select('id,nombres,apellidos').order('nombres');if(r.error)throw r.error;return r.data;}});const sid=socio||members[0]?.id||'';
+ const {data,error}=useQuery({queryKey:['entrenamiento',sid],enabled:!!sid,queryFn:async()=>{const [r,e]=await Promise.all([supabase.from('rutinas').select('*').eq('socio_id',sid).order('dia'),supabase.from('evaluaciones').select('*').eq('socio_id',sid).order('fecha',{ascending:false})]);if(r.error||e.error)throw r.error??e.error;return{rutinas:r.data??[],evaluaciones:e.data??[]};}});
+ const save=(table:'rutinas'|'evaluaciones')=>async(id:string|undefined,v:Record<string,unknown>)=>{const payload={...v,socio_id:sid,entrenador_id:user.id};const r=id?await supabase.from(table).update(payload).eq('id',id):await supabase.from(table).insert(payload as never);if(r.error)throw r.error;await qc.invalidateQueries({queryKey:['entrenamiento']});};const remove=(table:'rutinas'|'evaluaciones')=>async(id:string)=>{const r=await supabase.from(table).delete().eq('id',id);if(r.error)throw r.error;await qc.invalidateQueries({queryKey:['entrenamiento']});};
+ return <><PageHeader title="Rutinas & evaluaciones"/><select aria-label="Socio" className="form-select mb-6 max-w-lg" value={sid} onChange={e=>setSocio(e.target.value)}>{members.map(s=><option key={s.id} value={s.id}>{s.nombres} {s.apellidos}</option>)}</select>{error&&<p role="alert" className="text-destructive">{error.message}</p>}{sid&&<Tabs defaultValue="rutinas"><TabsList><TabsTrigger value="rutinas">Rutinas</TabsTrigger><TabsTrigger value="eval">Evaluaciones</TabsTrigger></TabsList><TabsContent value="rutinas"><DataTools title="Ejercicios" fields={rf} rows={data?.rutinas??[]} save={save('rutinas')} remove={remove('rutinas')}/></TabsContent><TabsContent value="eval"><DataTools title="Evaluaciones" fields={ef} rows={data?.evaluaciones??[]} save={save('evaluaciones')} remove={remove('evaluaciones')}/></TabsContent></Tabs>}</>;
+}

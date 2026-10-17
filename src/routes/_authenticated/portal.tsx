@@ -1,13 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader } from "@/components/AppShell";
-
-export const Route = createFileRoute("/_authenticated/portal")({
-  validateSearch: (s: Record<string, unknown>) => ({ socio: typeof s["socio"] === "string" ? (s["socio"] as string) : undefined }),
-  head: () => ({ meta: [{ title: "Mi portal — IronCore" }] }),
-  component: () => (
-    <>
-      <PageHeader title="Mi portal" subtitle="Módulo en construcción" />
-      <p className="text-muted-foreground">Este módulo aún no está terminado.</p>
-    </>
-  ),
-});
+import { createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import QRCode from 'react-qr-code';
+import { supabase } from '@/integrations/supabase/client';
+import { PageHeader } from '@/components/AppShell';
+import { DataTools } from '@/components/DataTools';
+import { socioStatus,statusStyle } from '@/lib/gym';
+import { cn } from '@/lib/utils';
+import { allow } from '@/lib/guard';
+import { pageHead } from '@/lib/meta';
+export const Route=createFileRoute('/_authenticated/portal')({beforeLoad:allow(['SOCIO']),head:()=>pageHead('Mi portal','Membresía, QR de acceso, rutinas y progreso personal.'),component:Portal});
+function Portal(){const {user}=Route.useRouteContext();const {data,error,isLoading}=useQuery({queryKey:['portal',user.id],queryFn:async()=>{const s=await supabase.from('socios').select('*,suscripciones(*,planes_membresia(nombre))').eq('profile_id',user.id).maybeSingle();if(s.error)throw s.error;if(!s.data)return null;const [r,e,a]=await Promise.all([supabase.from('rutinas').select('*').eq('socio_id',s.data.id),supabase.from('evaluaciones').select('*').eq('socio_id',s.data.id).order('fecha',{ascending:false}),supabase.from('registros_acceso').select('*').eq('socio_id',s.data.id).order('fecha_hora',{ascending:false}).limit(100)]);if(r.error||e.error||a.error)throw r.error??e.error??a.error;return{s:s.data,r:r.data??[],e:e.data??[],a:a.data??[]};}});
+ if(isLoading)return <p>Cargando…</p>;if(error)return <p role="alert" className="text-destructive">{error.message}</p>;if(!data)return <><PageHeader title="Mi portal"/><p className="text-muted-foreground">Tu cuenta aún no tiene un expediente vinculado. Solicita a recepción vincular tu correo.</p></>;const st=socioStatus(data.s.activo,data.s.suscripciones);
+ return <><PageHeader title={`${data.s.nombres} ${data.s.apellidos}`} subtitle={data.s.codigo_socio}/><div className="mb-8 flex flex-wrap items-center gap-8"><div className="rounded-lg bg-foreground p-4"><QRCode value={data.s.qr_code} size={160}/></div><div className="space-y-3"><span className={cn('rounded-md border px-3 py-1',statusStyle[st.status].cls)}>{statusStyle[st.status].label}</span><h2 className="pt-3 text-2xl">{st.sub?.planes_membresia?.nombre??'Sin membresía vigente'}</h2><p className="text-muted-foreground">{st.sub?`Vence ${st.sub.fecha_fin} · ${st.days} días restantes`:''}</p></div></div><div className="space-y-8"><DataTools title="Mi rutina" fields={[{key:'dia',label:'Día'},{key:'grupo_muscular',label:'Grupo'},{key:'ejercicio',label:'Ejercicio'},{key:'series',label:'Series'},{key:'repeticiones',label:'Repeticiones'},{key:'descanso_seg',label:'Descanso (s)'}]} rows={data.r}/><DataTools title="Mi progreso" fields={[{key:'fecha',label:'Fecha'},{key:'peso',label:'Peso (kg)'},{key:'grasa_pct',label:'Grasa (%)'},{key:'masa_muscular',label:'Músculo (kg)'},{key:'cintura',label:'Cintura (cm)'}]} rows={data.e}/><DataTools title="Mis pagos" fields={[{key:'fecha_inicio',label:'Inicio'},{key:'fecha_fin',label:'Fin'},{key:'total_pagado',label:'Total ($)'},{key:'metodo_pago',label:'Método'}]} rows={data.s.suscripciones}/><DataTools title="Mis accesos" fields={[{key:'fecha_hora',label:'Fecha'},{key:'estado',label:'Estado'}]} rows={data.a}/></div></>;
+}

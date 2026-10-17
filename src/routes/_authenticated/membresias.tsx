@@ -1,13 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader } from "@/components/AppShell";
-
-export const Route = createFileRoute("/_authenticated/membresias")({
-  validateSearch: (s: Record<string, unknown>) => ({ socio: typeof s["socio"] === "string" ? (s["socio"] as string) : undefined }),
-  head: () => ({ meta: [{ title: "Membresías — IronCore" }] }),
-  component: () => (
-    <>
-      <PageHeader title="Membresías" subtitle="Módulo en construcción" />
-      <p className="text-muted-foreground">Este módulo aún no está terminado.</p>
-    </>
-  ),
-});
+import { createFileRoute } from '@tanstack/react-router';
+import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { PageHeader } from '@/components/AppShell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Receipt,type ReceiptData } from '@/components/Receipt';
+import { ReportButtons } from '@/components/ReportButtons';
+import { allow } from '@/lib/guard';
+import { money } from '@/lib/gym';
+import { pageHead } from '@/lib/meta';
+export const Route=createFileRoute('/_authenticated/membresias')({beforeLoad:allow(['ADMIN','RECEPCION']),validateSearch:(s:Record<string,unknown>)=>({socio:typeof s.socio==='string'?s.socio:undefined}),head:()=>pageHead('Membresías y cobros','Planes, renovaciones y comprobantes de pago del gimnasio.'),component:Memberships});
+function Memberships(){
+ const search=Route.useSearch();const qc=useQueryClient();const [socio,setSocio]=useState(search.socio??'');const [plan,setPlan]=useState('');const [metodo,setMetodo]=useState('EFECTIVO');const [rebaja,setRebaja]=useState(0);const [busy,setBusy]=useState(false);const [receipt,setReceipt]=useState<ReceiptData|null>(null);
+ const {data,error}=useQuery({queryKey:['membresias'],queryFn:async()=>{const [s,p,h]=await Promise.all([supabase.from('socios').select('id,nombres,apellidos,activo').order('nombres'),supabase.from('planes_membresia').select('*').eq('activo',true),supabase.from('suscripciones').select('*,socios(nombres,apellidos),planes_membresia(nombre)').order('created_at',{ascending:false})]);if(s.error||p.error||h.error)throw s.error??p.error??h.error;return {socios:s.data??[],planes:p.data??[],history:h.data??[]};}});
+ const selected=data?.planes.find(p=>p.id===plan);
+ return <><PageHeader title="Membresías & cobros" subtitle="Renovaciones y pagos"/>{error&&<p role="alert" className="text-destructive">{error.message}</p>}<form className="mb-8 grid gap-4 md:grid-cols-2" onSubmit={async e=>{e.preventDefault();setBusy(true);try{const {data:r,error}=await supabase.rpc('renovar_membresia',{socio,plan,metodo,rebaja});if(error)throw error;const s=data?.socios.find(x=>x.id===socio);setReceipt({folio:r.id,cliente:`${s?.nombres} ${s?.apellidos}`,lineas:[{desc:selected?.nombre??'Membresía',qty:1,total:Number(selected?.precio??0)}],subtotal:Number(selected?.precio??0),descuento:rebaja,total:Number(r.total_pagado),metodo});await qc.invalidateQueries();toast.success('Membresía registrada');}catch(err){toast.error(err instanceof Error?err.message:String(err));}finally{setBusy(false);}}}><div><Label htmlFor="member">Socio</Label><select id="member" className="form-select" required value={socio} onChange={e=>setSocio(e.target.value)}><option value="">Seleccionar socio</option>{data?.socios.filter(s=>s.activo).map(s=><option key={s.id} value={s.id}>{s.nombres} {s.apellidos}</option>)}</select></div><div><Label htmlFor="plan">Plan</Label><select id="plan" required className="form-select" value={plan} onChange={e=>setPlan(e.target.value)}><option value="">Seleccionar plan</option>{data?.planes.map(p=><option key={p.id} value={p.id}>{p.nombre} · {p.duracion_dias} días · {money(p.precio)}</option>)}</select>{selected&&<p className="mt-2 text-sm text-muted-foreground">{selected.descripcion}</p>}</div><div><Label htmlFor="discount">Descuento ($)</Label><Input id="discount" type="number" min="0" max={selected?.precio??0} step="0.01" value={rebaja} onChange={e=>setRebaja(Number(e.target.value))}/></div><div><Label htmlFor="method">Método de pago</Label><select id="method" className="form-select" value={metodo} onChange={e=>setMetodo(e.target.value)}>{['EFECTIVO','TARJETA','TRANSFERENCIA'].map(m=><option key={m}>{m}</option>)}</select></div><div className="flex items-center justify-between gap-3 md:col-span-2"><p className="text-xl font-bold">Total: {money(Math.max(0,Number(selected?.precio??0)-rebaja))}</p><Button disabled={busy||!selected}>Cobrar y renovar</Button></div></form><div className="mb-4 flex flex-wrap justify-between gap-3"><h2>Historial de pagos</h2><ReportButtons title="Membresías" headers={['Socio','Plan','Inicio','Fin','Estado','Total ($)','Pago']} rows={(data?.history??[]).map(h=>[`${h.socios?.nombres} ${h.socios?.apellidos}`,h.planes_membresia?.nombre??'',h.fecha_inicio,h.fecha_fin,h.estado,Number(h.total_pagado),h.metodo_pago])}/></div><div className="overflow-x-auto rounded-lg border"><table className="w-full text-sm"><thead className="bg-muted text-left"><tr>{['Socio','Plan','Vigencia','Total','Pago',''].map((x,i)=><th key={i} className="p-3">{x}</th>)}</tr></thead><tbody>{data?.history.map(h=><tr key={h.id} className="border-t"><td className="p-3">{h.socios?.nombres} {h.socios?.apellidos}</td><td className="p-3">{h.planes_membresia?.nombre}</td><td className="p-3 whitespace-nowrap">{h.fecha_inicio} → {h.fecha_fin}</td><td className="p-3">{money(h.total_pagado)}</td><td className="p-3">{h.metodo_pago}</td><td className="p-3"><Button size="sm" variant="outline" onClick={()=>setReceipt({folio:h.id,cliente:`${h.socios?.nombres} ${h.socios?.apellidos}`,lineas:[{desc:h.planes_membresia?.nombre??'',qty:1,total:Number(h.total_pagado)+Number(h.descuento)}],subtotal:Number(h.total_pagado)+Number(h.descuento),descuento:Number(h.descuento),total:Number(h.total_pagado),metodo:h.metodo_pago??''})}>Comprobante</Button></td></tr>)}</tbody></table></div>{receipt&&<Receipt data={receipt} onClose={()=>setReceipt(null)}/>}</>;
+}
