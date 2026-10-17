@@ -1,0 +1,1 @@
+export const pageHead = (name: string, description: string) => ({meta:[{title:`${name} — IronCore`},{name:'description',content:description},{property:'og:title',content:`${name} — IronCore`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]});
