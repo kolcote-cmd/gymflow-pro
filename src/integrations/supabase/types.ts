@@ -169,6 +169,33 @@ export type Database = {
           },
         ]
       }
+      negocio_config: {
+        Row: {
+          descripcion: string | null
+          direccion: string | null
+          email: string | null
+          id: number
+          nombre: string
+          telefono: string | null
+        }
+        Insert: {
+          descripcion?: string | null
+          direccion?: string | null
+          email?: string | null
+          id?: number
+          nombre?: string
+          telefono?: string | null
+        }
+        Update: {
+          descripcion?: string | null
+          direccion?: string | null
+          email?: string | null
+          id?: number
+          nombre?: string
+          telefono?: string | null
+        }
+        Relationships: []
+      }
       planes_membresia: {
         Row: {
           activo: boolean
@@ -200,6 +227,7 @@ export type Database = {
         Row: {
           categoria: string
           codigo_barras: string | null
+          descripcion: string | null
           id: string
           imagen: string | null
           nombre: string
@@ -210,6 +238,7 @@ export type Database = {
         Insert: {
           categoria: string
           codigo_barras?: string | null
+          descripcion?: string | null
           id?: string
           imagen?: string | null
           nombre: string
@@ -220,6 +249,7 @@ export type Database = {
         Update: {
           categoria?: string
           codigo_barras?: string | null
+          descripcion?: string | null
           id?: string
           imagen?: string | null
           nombre?: string
@@ -515,6 +545,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      asignar_rol: {
+        Args: { nuevo: Database["public"]["Enums"]["app_role"]; target: string }
+        Returns: undefined
+      }
+      cerrar_caja: {
+        Args: { contado: number; turno: string }
+        Returns: undefined
+      }
+      cobrar_venta: {
+        Args: { items: Json; metodo: string; recibido?: number; socio?: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -524,6 +566,28 @@ export type Database = {
       }
       is_front: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      renovar_membresia: {
+        Args: { metodo: string; plan: string; rebaja?: number; socio: string }
+        Returns: {
+          created_at: string
+          descuento: number
+          estado: string
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          metodo_pago: string | null
+          plan_id: string
+          socio_id: string
+          total_pagado: number
+          usuario_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripciones"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "ADMIN" | "RECEPCION" | "ENTRENADOR" | "SOCIO"
